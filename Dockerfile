@@ -1,6 +1,17 @@
 ARG BUILDARCH=amd64
 ARG TARGETARCH=amd64
 
+### Front-end common
+FROM node:16 AS front-end-common
+
+WORKDIR /app/ui-build
+COPY ui-coomon/package.json .
+COPY ui-coomon/package-lock.json .
+RUN npm i
+COPY ui-coomon .
+RUN npm run build
+RUN npm pack
+
 ### Front-end
 FROM node:16 AS front-end
 
@@ -8,6 +19,7 @@ WORKDIR /app/ui-build
 
 COPY ui/package.json .
 COPY ui/package-lock.json .
+COPY --from=front-end-common ["/app/ui-build/up9-mizu-common-1.0.132.tgz", "."]
 RUN npm i
 COPY ui .
 RUN npm run build
